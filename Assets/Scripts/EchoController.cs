@@ -4,28 +4,27 @@ using UnityEngine.InputSystem;
 public class EchoController : MonoBehaviour
 {
     public float moveSpeed = 5f;
-    public float jumpForce = 10f;
+    public float jumpForce = 6f;
     private Rigidbody2D rb;
     private bool isGrounded;
-    private bool isActive = false;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.simulated = false;
-        gameObject.GetComponent<SpriteRenderer>().color = new Color(0.5f, 0.47f, 0.87f, 0.5f);
+        rb.gravityScale = 1;
     }
 
     void Update()
     {
         if (Keyboard.current.eKey.wasPressedThisFrame)
         {
-            isActive = !isActive;
-            rb.simulated = isActive;
-            Debug.Log("Echo deployed: " + isActive);
+            PlayerController.echoActive = !PlayerController.echoActive;
+            rb.simulated = PlayerController.echoActive;
+            isGrounded = false;
         }
 
-        if (!isActive) return;
+        if (!PlayerController.echoActive) return;
 
         float move = 0;
         if (Keyboard.current.aKey.isPressed) move = -1;
@@ -41,6 +40,14 @@ public class EchoController : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D col)
     {
+        // Ignore echo's own platforms
+        if (col.gameObject.name.Contains("EchoPlatform")) return;
         isGrounded = true;
+    }
+
+    void OnCollisionExit2D(Collision2D col)
+    {
+        if (col.gameObject.name.Contains("EchoPlatform")) return;
+        isGrounded = false;
     }
 }

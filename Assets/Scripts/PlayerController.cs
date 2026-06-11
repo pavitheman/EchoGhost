@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     public float jumpForce = 10f;
     private Rigidbody2D rb;
     private bool isGrounded;
+    public static bool echoActive = false;
 
     void Start()
     {
@@ -15,6 +16,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (echoActive) return;
+
         float move = 0;
         if (Keyboard.current.leftArrowKey.isPressed) move = -1;
         if (Keyboard.current.rightArrowKey.isPressed) move = 1;
