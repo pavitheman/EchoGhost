@@ -6,7 +6,7 @@ public class EchoTrail : MonoBehaviour
 {
     private LineRenderer lr;
     private List<Vector2> points = new List<Vector2>();
-    public float minDistance = 0.5f;
+    public float minDistance = 0.2f;
     public float trailThickness = 0.2f;
     private bool wasActive = false;
     private List<GameObject> colliderObjects = new List<GameObject>();
@@ -21,7 +21,6 @@ public class EchoTrail : MonoBehaviour
     {
         if (PlayerController.echoActive)
         {
-            // Clear old trail when redeploying
             if (!wasActive)
             {
                 points.Clear();
@@ -49,7 +48,23 @@ public class EchoTrail : MonoBehaviour
         }
     }
 
-    void SolidifyTrail()
+    public void ClearTrail()
+    {
+        points.Clear();
+        lr.positionCount = 0;
+        foreach (var obj in colliderObjects)
+            if (obj != null) Destroy(obj);
+        colliderObjects.Clear();
+        wasActive = false;
+    }
+
+    public void SolidifyOnDeath()
+    {
+        wasActive = false;
+        SolidifyTrail();
+    }
+
+    public void SolidifyTrail()
     {
         if (points.Count < 2) return;
 
@@ -72,7 +87,5 @@ public class EchoTrail : MonoBehaviour
             col.size = new Vector2(length, trailThickness);
             colliderObjects.Add(seg);
         }
-
-        Debug.Log("Trail solidified with " + colliderObjects.Count + " segments");
     }
 }
