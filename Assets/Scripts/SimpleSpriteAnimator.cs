@@ -11,7 +11,7 @@ public class SimpleSpriteAnimator : MonoBehaviour
     private Rigidbody2D rb;
     private int currentFrame;
     private float timer;
-    private int lastState = -1; // 0 = idle, 1 = walk, 2 = jump
+    private int lastState = -1;
 
     void Start()
     {
@@ -21,8 +21,14 @@ public class SimpleSpriteAnimator : MonoBehaviour
 
     void Update()
     {
-        bool isMoving = Mathf.Abs(Input.GetAxisRaw("Horizontal")) > 0.01f;
+        bool isMoving = Mathf.Abs(rb.linearVelocity.x) > 0.1f;
         bool isJumping = Mathf.Abs(rb.linearVelocity.y) > 0.1f;
+
+        // Flip sprite based on horizontal direction
+        if (rb.linearVelocity.x > 0.1f)
+            spriteRenderer.flipX = false;
+        else if (rb.linearVelocity.x < -0.1f)
+            spriteRenderer.flipX = true;
 
         int state = isJumping ? 2 : (isMoving ? 1 : 0);
 
