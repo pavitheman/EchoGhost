@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class Spike : MonoBehaviour
 {
@@ -9,8 +8,11 @@ public class Spike : MonoBehaviour
 
         if (other.CompareTag("Player"))
         {
-            Time.timeScale = 1f;
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            PlayerController player = other.GetComponent<PlayerController>();
+            if (player != null)
+            {
+                player.Die();
+            }
         }
 
         if (other.CompareTag("Echo"))

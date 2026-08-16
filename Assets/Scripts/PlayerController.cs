@@ -8,10 +8,14 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private bool isGrounded;
     public static bool echoActive = false;
+    public static bool nearTotem = false;
+
+    private Vector3 checkpoint;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        checkpoint = transform.position;
     }
 
     void Update()
@@ -28,6 +32,17 @@ public class PlayerController : MonoBehaviour
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             isGrounded = false;
         }
+    }
+
+    public void SetCheckpoint(Vector3 pos)
+    {
+        checkpoint = pos;
+    }
+
+    public void Die()
+    {
+        transform.position = checkpoint;
+        rb.linearVelocity = Vector2.zero;
     }
 
     void OnCollisionEnter2D(Collision2D col)
