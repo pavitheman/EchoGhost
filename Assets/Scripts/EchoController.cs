@@ -4,10 +4,13 @@ using UnityEngine.InputSystem;
 public class EchoController : MonoBehaviour
 {
     public float moveSpeed = 5f;
-    public float jumpForce = 6f;
+    public float jumpForce = 9f;
+    public bool isDoubleJumping = false;
 
     private Rigidbody2D rb;
     private bool isGrounded;
+    private int jumpCount = 0;
+    private int maxJumps = 2;
     private Vector3 spawnPosition;
     private SpriteRenderer spriteRenderer;
 
@@ -16,17 +19,22 @@ public class EchoController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
 
-        // Echo starts inactive
         rb.simulated = false;
         rb.gravityScale = 1;
 
-        // Save its initial position as a fallback
         spawnPosition = transform.position;
 
-        // Make sure the Echo is invisible at the start
+        BoxCollider2D triggerCol = GetComponent<BoxCollider2D>();
+
+        if (triggerCol == null)
+        {
+            triggerCol = gameObject.AddComponent<BoxCollider2D>();
+        }
+
+        triggerCol.isTrigger = false;
+
         spriteRenderer.enabled = false;
 
-        // Ignore collision with Player
         GameObject player = GameObject.FindWithTag("Player");
 
         if (player != null)
@@ -44,77 +52,78 @@ public class EchoController : MonoBehaviour
     public void SetSpawnPoint(Vector3 newSpawn)
     {
         spawnPosition = newSpawn;
-
-        Debug.Log("Echo spawn point set to: " + spawnPosition);
     }
 
     void Update()
     {
-        // Press E
         if (Keyboard.current.eKey.wasPressedThisFrame)
         {
-            // Only allow activation near the portal
-            if (!PlayerController.echoActive && !PlayerController.nearTotem)
+            bool turningOn = !PlayerController.echoActive;
+
+            if (turningOn && !PlayerController.nearTotem)
             {
-                Debug.Log("E pressed, but player is not near the portal.");
+                Debug.Log("E pressed but player is not near the portal.");
                 return;
             }
 
-            // Toggle Echo
             PlayerController.echoActive = !PlayerController.echoActive;
 
-            // Turn physics on/off
             rb.simulated = PlayerController.echoActive;
-
-            // Turn sprite on/off
             spriteRenderer.enabled = PlayerController.echoActive;
-
-            isGrounded = false;
 
             if (PlayerController.echoActive)
             {
-                // Spawn AT THE PORTAL
                 transform.position = spawnPosition;
-
-                // Stop movement
                 rb.linearVelocity = Vector2.zero;
-
-                Debug.Log("ECHO SPAWNED AT PORTAL: " + transform.position);
-                Debug.Log("Sprite visible: " + spriteRenderer.enabled);
+                jumpCount = 0;
+                isGrounded = false;
+                isDoubleJumping = false;
             }
             else
             {
-                Debug.Log("Echo turned off.");
+                isDoubleJumping = false;
             }
         }
 
-        // Don't move if Echo is inactive
         if (!PlayerController.echoActive)
             return;
 
-        // Horizontal movement
-        float move = 0f;
+        float move = 0;
 
         if (Keyboard.current.aKey.isPressed)
-            move = -1f;
+            move = -1;
 
         if (Keyboard.current.dKey.isPressed)
-            move = 1f;
+            move = 1;
 
         rb.linearVelocity = new Vector2(
             move * moveSpeed,
             rb.linearVelocity.y
         );
 
-        // Jump
-        if (Keyboard.current.wKey.wasPressedThisFrame && isGrounded)
+        if (Keyboard.current.wKey.wasPressedThisFrame)
         {
-            rb.linearVelocity = new Vector2(
-                rb.linearVelocity.x,
-                jumpForce
-            );
+            if (isGrounded)
+            {
+                rb.linearVelocity = new Vector2(
+                    rb.linearVelocity.x,
+                    jumpForce
+                );
 
-            isGrounded = false;
+                jumpCount = 1;
+                isGrounded = false;
+                isDoubleJumping = false;
+            }
+            else if (jumpCount < maxJumps)
+            {
+                rb.linearVelocity = new Vector2(
+                    rb.linearVelocity.x,
+                    jumpForce
+                );
+
+                jumpCount++;
+                isDoubleJumping = true;
+            }
         }
     }
 
@@ -123,7 +132,16 @@ public class EchoController : MonoBehaviour
         if (col.gameObject.name.Contains("TrailSegment"))
             return;
 
-        isGrounded = true;
+        foreach (ContactPoint2D contact in col.contacts)
+        {
+            if (contact.normal.y > 0.5f)
+            {
+                isGrounded = true;
+                jumpCount = 0;
+                isDoubleJumping = false;
+                break;
+            }
+        }
     }
 
     void OnCollisionExit2D(Collision2D col)
