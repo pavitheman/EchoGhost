@@ -35,6 +35,8 @@ public class Totem : MonoBehaviour
                 player.SetCheckpoint(other.transform.position);
             }
 
+            CheckpointManager.Instance.RegisterCheckpoint(other.transform.position);
+
             activated = true;
             if (litSprite != null)
                 sr.sprite = litSprite;
