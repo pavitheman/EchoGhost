@@ -1,12 +1,11 @@
+using Unity.VectorGraphics;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class DoorTeleporter : MonoBehaviour
 {
-    public Transform destination;
     public Door door;
-    public float cooldown = 0.5f;
-    [HideInInspector] public float lastTeleportTime = -10f;
     private bool playerNearby = false;
 
     void OnTriggerEnter2D(Collider2D other)
@@ -25,16 +24,10 @@ public class DoorTeleporter : MonoBehaviour
     {
         if (!playerNearby) return;
         if (door != null && !door.IsOpen) return;
-        if (Time.time - lastTeleportTime < cooldown) return;
 
         if (Keyboard.current.eKey.wasPressedThisFrame)
         {
-            GameObject.FindWithTag("Player").transform.position = destination.position;
-
-            if (destination.TryGetComponent<DoorTeleporter>(out var otherTeleporter))
-                otherTeleporter.lastTeleportTime = Time.time;
-
-            lastTeleportTime = Time.time;
+            SceneManager.LoadScene("Level_2");
         }
     }
 }

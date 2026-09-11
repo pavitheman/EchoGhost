@@ -3,8 +3,8 @@ using UnityEngine.InputSystem;
 
 public class EchoController : MonoBehaviour
 {
-    public float moveSpeed = 5f;
-    public float jumpForce = 9f;
+    public float moveSpeed = 10f;
+    public float jumpForce = 15f;
     public bool isDoubleJumping = false;
 
     private Rigidbody2D rb;

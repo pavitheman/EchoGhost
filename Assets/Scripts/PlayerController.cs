@@ -3,8 +3,8 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 5f;
-    public float jumpForce = 10f;
+    public float moveSpeed = 10f;
+    public float jumpForce = 31f;
     private Rigidbody2D rb;
     private bool isGrounded;
     public static bool echoActive = false;
