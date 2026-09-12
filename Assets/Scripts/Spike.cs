@@ -12,6 +12,7 @@ public class Spike : MonoBehaviour
             if (player != null)
             {
                 player.Die();
+                PlayHitSound();
             }
         }
 
@@ -22,6 +23,18 @@ public class Spike : MonoBehaviour
             other.gameObject.GetComponent<Rigidbody2D>().simulated = false;
             EchoTrail trail = other.gameObject.GetComponent<EchoTrail>();
             if (trail != null) trail.SolidifyOnDeath();
+            PlayHitSound();
+        }
+    }
+
+    void PlayHitSound()
+    {
+        AudioClip clip = Resources.Load<AudioClip>("Audio/spike_hit");
+        if (clip != null)
+        {
+            // Use a temporary audio source at this position so the sound
+            // survives even if the object it's attached to is disabled/reset.
+            AudioSource.PlayClipAtPoint(clip, transform.position, 1f);
         }
     }
 }

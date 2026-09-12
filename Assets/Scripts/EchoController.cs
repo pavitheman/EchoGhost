@@ -14,6 +14,17 @@ public class EchoController : MonoBehaviour
     private Vector3 spawnPosition;
     private SpriteRenderer spriteRenderer;
 
+    // --- Audio ---
+    private AudioSource sfx;      // one-shot sounds: jump, land, footstep, toggle
+    private AudioSource hum;      // looping ambient echo hum while active
+    private AudioClip jumpClip;
+    private AudioClip landClip;
+    private AudioClip footstepClip;
+    private AudioClip toggleClip;
+    private AudioClip humClip;
+    public float footstepInterval = 0.28f;
+    private float footstepTimer = 0f;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -47,6 +58,20 @@ public class EchoController : MonoBehaviour
                 Physics2D.IgnoreCollision(echoCollider, playerCollider);
             }
         }
+
+        sfx = gameObject.AddComponent<AudioSource>();
+        sfx.playOnAwake = false;
+
+        hum = gameObject.AddComponent<AudioSource>();
+        hum.playOnAwake = false;
+        hum.loop = true;
+        hum.volume = 0.35f;
+
+        jumpClip = Resources.Load<AudioClip>("Audio/jump");
+        landClip = Resources.Load<AudioClip>("Audio/land");
+        footstepClip = Resources.Load<AudioClip>("Audio/footstep");
+        toggleClip = Resources.Load<AudioClip>("Audio/echo_toggle");
+        humClip = Resources.Load<AudioClip>("Audio/echo_hum");
     }
 
     public void SetSpawnPoint(Vector3 newSpawn)
@@ -68,6 +93,8 @@ public class EchoController : MonoBehaviour
 
             PlayerController.echoActive = !PlayerController.echoActive;
 
+            if (toggleClip != null) sfx.PlayOneShot(toggleClip);
+
             rb.simulated = PlayerController.echoActive;
             spriteRenderer.enabled = PlayerController.echoActive;
 
@@ -78,10 +105,17 @@ public class EchoController : MonoBehaviour
                 jumpCount = 0;
                 isGrounded = false;
                 isDoubleJumping = false;
+
+                if (humClip != null)
+                {
+                    hum.clip = humClip;
+                    hum.Play();
+                }
             }
             else
             {
                 isDoubleJumping = false;
+                if (hum.isPlaying) hum.Stop();
             }
         }
 
@@ -101,6 +135,21 @@ public class EchoController : MonoBehaviour
             rb.linearVelocity.y
         );
 
+        // Footstep loop while grounded and moving
+        if (isGrounded && Mathf.Abs(move) > 0.01f)
+        {
+            footstepTimer -= Time.deltaTime;
+            if (footstepTimer <= 0f)
+            {
+                if (footstepClip != null) sfx.PlayOneShot(footstepClip, 0.5f);
+                footstepTimer = footstepInterval;
+            }
+        }
+        else
+        {
+            footstepTimer = 0f;
+        }
+
         if (Keyboard.current.wKey.wasPressedThisFrame)
         {
             if (isGrounded)
@@ -113,6 +162,7 @@ public class EchoController : MonoBehaviour
                 jumpCount = 1;
                 isGrounded = false;
                 isDoubleJumping = false;
+                if (jumpClip != null) sfx.PlayOneShot(jumpClip, 0.75f);
             }
             else if (jumpCount < maxJumps)
             {
@@ -123,6 +173,7 @@ public class EchoController : MonoBehaviour
 
                 jumpCount++;
                 isDoubleJumping = true;
+                if (jumpClip != null) sfx.PlayOneShot(jumpClip, 0.6f);
             }
         }
     }
@@ -136,6 +187,10 @@ public class EchoController : MonoBehaviour
         {
             if (contact.normal.y > 0.5f)
             {
+                if (!isGrounded && landClip != null)
+                {
+                    sfx.PlayOneShot(landClip, 0.6f);
+                }
                 isGrounded = true;
                 jumpCount = 0;
                 isDoubleJumping = false;

@@ -12,10 +12,26 @@ public class PlayerController : MonoBehaviour
 
     private Vector3 checkpoint;
 
+    // --- Audio ---
+    private AudioSource sfx;
+    private AudioClip jumpClip;
+    private AudioClip landClip;
+    private AudioClip footstepClip;
+    public float footstepInterval = 0.32f;
+    private float footstepTimer = 0f;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         checkpoint = transform.position;
+
+        sfx = GetComponent<AudioSource>();
+        if (sfx == null) sfx = gameObject.AddComponent<AudioSource>();
+        sfx.playOnAwake = false;
+
+        jumpClip = Resources.Load<AudioClip>("Audio/jump");
+        landClip = Resources.Load<AudioClip>("Audio/land");
+        footstepClip = Resources.Load<AudioClip>("Audio/footstep");
     }
 
     void Update()
@@ -27,10 +43,26 @@ public class PlayerController : MonoBehaviour
         if (Keyboard.current.rightArrowKey.isPressed) move = 1;
         rb.linearVelocity = new Vector2(move * moveSpeed, rb.linearVelocity.y);
 
+        // Footstep loop while grounded and actually moving
+        if (isGrounded && Mathf.Abs(move) > 0.01f)
+        {
+            footstepTimer -= Time.deltaTime;
+            if (footstepTimer <= 0f)
+            {
+                if (footstepClip != null) sfx.PlayOneShot(footstepClip, 0.6f);
+                footstepTimer = footstepInterval;
+            }
+        }
+        else
+        {
+            footstepTimer = 0f;
+        }
+
         if (Keyboard.current.zKey.wasPressedThisFrame && isGrounded)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             isGrounded = false;
+            if (jumpClip != null) sfx.PlayOneShot(jumpClip, 0.75f);
         }
     }
 
@@ -47,6 +79,10 @@ public class PlayerController : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D col)
     {
+        if (!isGrounded && landClip != null && Time.timeSinceLevelLoad > 0.3f)
+        {
+            sfx.PlayOneShot(landClip, 0.7f);
+        }
         isGrounded = true;
     }
 }

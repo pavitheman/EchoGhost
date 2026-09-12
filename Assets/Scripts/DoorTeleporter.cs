@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 public class DoorTeleporter : MonoBehaviour
 {
     public Door door;
+    public string targetScene = "Level_2";
     private bool playerNearby = false;
 
     void OnTriggerEnter2D(Collider2D other)
@@ -27,7 +28,7 @@ public class DoorTeleporter : MonoBehaviour
 
         if (Keyboard.current.eKey.wasPressedThisFrame)
         {
-            SceneManager.LoadScene("Level_2");
+            SceneManager.LoadScene(targetScene);
         }
     }
 }
