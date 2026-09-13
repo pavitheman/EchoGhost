@@ -43,7 +43,7 @@ public class DoorButton : MonoBehaviour
 
         // Deliberately NOT the E/interact key -- this switch only responds
         // to Up Arrow, so E can never activate it.
-        if (playerNearby && !isPressed && Keyboard.current.upArrowKey.wasPressedThisFrame)
+        if (playerNearby && !isPressed && Keyboard.current.eKey.wasPressedThisFrame)
         {
             isPressed = true;
             sr.sprite = pressedSprite;
