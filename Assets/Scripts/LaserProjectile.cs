@@ -27,11 +27,12 @@ public class LaserProjectile : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            Vector3 respawn = CheckpointManager.Instance.GetNearestCheckpoint(other.transform.position);
-            other.transform.position = respawn;
+            PlayerController player = other.GetComponent<PlayerController>();
 
-            if (other.TryGetComponent<Rigidbody2D>(out var rb))
-                rb.linearVelocity = Vector2.zero;
+            if (player != null)
+            {
+                player.Die();
+            }
 
             Destroy(gameObject);
         }

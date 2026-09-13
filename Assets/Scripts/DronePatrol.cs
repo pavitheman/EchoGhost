@@ -33,12 +33,15 @@ public class DronePatrol : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
+        if (other.CompareTag("Player"))
+        {
+            PlayerController player = other.GetComponent<PlayerController>();
 
-        Vector3 respawn = CheckpointManager.Instance.GetNearestCheckpoint(other.transform.position);
-        other.transform.position = respawn;
-
-        if (other.TryGetComponent<Rigidbody2D>(out var rb))
-            rb.linearVelocity = Vector2.zero;
+            if (player != null)
+            {
+                player.Die();
+            }
+        }
     }
+
 }
