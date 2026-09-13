@@ -10,6 +10,10 @@ public class PlayerController : MonoBehaviour
     public static bool echoActive = false;
     public static bool nearTotem = false;
 
+    // Total deaths (player + Echo) since the current scene loaded. Read by
+    // DeathCounterUI to drive the on-screen counter.
+    public static int DeathCount = 0;
+
     private Vector3 checkpoint;
 
     // --- Audio ---
@@ -73,6 +77,7 @@ public class PlayerController : MonoBehaviour
 
     public void Die()
     {
+        DeathCount++;
         transform.position = checkpoint;
         rb.linearVelocity = Vector2.zero;
     }

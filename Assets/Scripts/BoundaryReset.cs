@@ -17,6 +17,7 @@ public class BoundaryReset : MonoBehaviour
 
         if (other.CompareTag("Echo"))
         {
+            PlayerController.DeathCount++;
             PlayerController.echoActive = false;
             other.gameObject.GetComponent<SpriteRenderer>().enabled = false;
             other.gameObject.GetComponent<Rigidbody2D>().simulated = false;
